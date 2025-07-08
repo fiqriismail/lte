@@ -4,7 +4,7 @@
 #include <QString>
 #include <QFont>
 #include <QFontMetrics>
-#include "../shared/interfaces/ilinenumberservice.h"
+#include "shared/interfaces/ilinenumberservice.h"
 
 class LineNumberService : public ILineNumberService
 {

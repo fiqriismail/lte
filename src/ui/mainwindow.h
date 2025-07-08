@@ -9,9 +9,9 @@
 #include <QWidget>
 #include "toolbar.h"
 #include "linenumberwidget.h"
-#include "../../features/shared/interfaces/ifileservice.h"
-#include "../../features/shared/interfaces/ifontservice.h"
-#include "../../features/shared/interfaces/ilinenumberservice.h"
+#include "shared/interfaces/ifileservice.h"
+#include "shared/interfaces/ifontservice.h"
+#include "shared/interfaces/ilinenumberservice.h"
 
 class MainWindow : public QMainWindow
 {

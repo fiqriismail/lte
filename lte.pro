@@ -28,15 +28,15 @@ SOURCES += features/line-numbers/linenumberservice.cpp
 HEADERS += features/line-numbers/linenumberservice.h
 
 # Shared interfaces and types
-HEADERS += features/shared/interfaces/ifileservice.h
-HEADERS += features/shared/interfaces/ifontservice.h
-HEADERS += features/shared/interfaces/ilinenumberservice.h
-HEADERS += features/shared/types/common.h
+HEADERS += shared/interfaces/ifileservice.h
+HEADERS += shared/interfaces/ifontservice.h
+HEADERS += shared/interfaces/ilinenumberservice.h
+HEADERS += shared/types/common.h
 
 # Include paths
 INCLUDEPATH += src/ui
 INCLUDEPATH += features/file-operations
 INCLUDEPATH += features/font-management
 INCLUDEPATH += features/line-numbers
-INCLUDEPATH += features/shared/interfaces
-INCLUDEPATH += features/shared/types 
+INCLUDEPATH += shared/interfaces
+INCLUDEPATH += shared/types 

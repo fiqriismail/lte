@@ -3,7 +3,7 @@
 #include "../../features/file-operations/fileservice.h"
 #include "../../features/font-management/fontservice.h"
 #include "../../features/line-numbers/linenumberservice.h"
-#include "../../features/shared/types/common.h"
+#include "shared/types/common.h"
 
 int main(int argc, char *argv[])
 {
