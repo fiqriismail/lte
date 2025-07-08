@@ -9,7 +9,7 @@ This project follows **Vertical Slicing Architecture**, organizing code by featu
 ### Directory Structure
 
 ```
-app1/
+/
 ├── src/
 │   ├── core/           # Application entry point
 │   │   └── main.cpp
@@ -106,14 +106,14 @@ To add a new feature:
 2. Define interfaces in `features/shared/interfaces/`
 3. Implement business logic in the feature directory
 4. Update UI in `src/ui/` to use the new service
-5. Update `hello.pro` to include new files
+5. Update `lte.pro` to include new files
 
 ## 📋 Project Files
 
 ### Core Files
 - `src/core/main.cpp` - Application entry point
 - `src/ui/mainwindow.h/cpp` - Main window UI
-- `hello.pro` - Qt project configuration
+- `lte.pro` - Qt project configuration
 
 ### Feature Files
 - `features/file-operations/fileservice.h/cpp` - File operations
@@ -124,14 +124,3 @@ To add a new feature:
 - `build.sh` - Automated build script
 - `.gitignore` - Git ignore rules for Qt/C++ projects
 - `README.md` - Project documentation
-
-## 📋 Future Enhancements
-
-- [ ] Add text editing service layer
-- [ ] Implement configuration management
-- [ ] Add logging and error handling
-- [ ] Create unit tests for services
-- [ ] Add more file formats support
-- [ ] Implement search and replace functionality
-- [ ] Add syntax highlighting
-- [ ] Implement plugin architecture 
