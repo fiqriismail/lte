@@ -7,16 +7,15 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QStandardPaths>
-#include <QFontDatabase>
 
-MainWindow::MainWindow(IFileService *fileService, QWidget *parent)
+MainWindow::MainWindow(IFileService *fileService, IFontService *fontService, QWidget *parent)
     : QMainWindow(parent)
     , m_textEdit(nullptr)
     , m_menuBar(nullptr)
     , m_toolBar(nullptr)
     , m_fileService(fileService)
+    , m_fontService(fontService)
     , m_currentFilePath("")
-    , m_currentFontSize(DEFAULT_FONT_SIZE)
     , m_newAction(nullptr)
     , m_openAction(nullptr)
     , m_saveAction(nullptr)
@@ -132,12 +131,8 @@ void MainWindow::setupToolBar()
 
 void MainWindow::setupFontManagement()
 {
-    // Set up default professional font
-    m_defaultFont = QFont("SF Mono", DEFAULT_FONT_SIZE);
-    m_defaultFont.setStyleHint(QFont::Monospace);
-    
-    // Apply the font to the text editor
-    m_textEdit->setFont(m_defaultFont);
+    // Apply the default font from the font service
+    applyCurrentFont();
 }
 
 void MainWindow::connectSignals()
@@ -268,22 +263,21 @@ void MainWindow::pasteText()
 // Font Management Operations Slice
 void MainWindow::increaseFontSize()
 {
-    if (m_currentFontSize < MAX_FONT_SIZE) {
-        setFontSize(m_currentFontSize + 1);
+    if (m_fontService->increaseFontSize()) {
+        applyCurrentFont();
     }
 }
 
 void MainWindow::decreaseFontSize()
 {
-    if (m_currentFontSize > MIN_FONT_SIZE) {
-        setFontSize(m_currentFontSize - 1);
+    if (m_fontService->decreaseFontSize()) {
+        applyCurrentFont();
     }
 }
 
-void MainWindow::setFontSize(int size)
+void MainWindow::applyCurrentFont()
 {
-    m_currentFontSize = size;
-    QFont newFont = m_defaultFont;
-    newFont.setPointSize(m_currentFontSize);
-    m_textEdit->setFont(newFont);
+    QFont currentFont = m_fontService->getDefaultFont();
+    currentFont.setPointSize(m_fontService->getCurrentFontSize());
+    m_textEdit->setFont(currentFont);
 } 

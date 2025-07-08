@@ -5,16 +5,16 @@
 #include <QTextEdit>
 #include <QMenuBar>
 #include <QAction>
-#include <QFont>
 #include "toolbar.h"
 #include "../../features/shared/interfaces/ifileservice.h"
+#include "../../features/shared/interfaces/ifontservice.h"
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(IFileService *fileService, QWidget *parent = nullptr);
+    MainWindow(IFileService *fileService, IFontService *fontService, QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -44,20 +44,14 @@ private:
     void setupFontManagement();
     void connectSignals();
     bool maybeSave();
-    void setFontSize(int size);
+    void applyCurrentFont();
 
     QTextEdit *m_textEdit;
     QMenuBar *m_menuBar;
     ToolBar *m_toolBar;
     IFileService *m_fileService;
+    IFontService *m_fontService;
     QString m_currentFilePath;
-    
-    // Font management
-    QFont m_defaultFont;
-    int m_currentFontSize;
-    static const int MIN_FONT_SIZE = 8;
-    static const int MAX_FONT_SIZE = 25;
-    static const int DEFAULT_FONT_SIZE = 12;
     
     // File menu actions
     QAction *m_newAction;
