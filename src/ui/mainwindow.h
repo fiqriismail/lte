@@ -5,16 +5,20 @@
 #include <QTextEdit>
 #include <QMenuBar>
 #include <QAction>
+#include <QHBoxLayout>
+#include <QWidget>
 #include "toolbar.h"
+#include "linenumberwidget.h"
 #include "../../features/shared/interfaces/ifileservice.h"
 #include "../../features/shared/interfaces/ifontservice.h"
+#include "../../features/shared/interfaces/ilinenumberservice.h"
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(IFileService *fileService, IFontService *fontService, QWidget *parent = nullptr);
+    MainWindow(IFileService *fileService, IFontService *fontService, ILineNumberService *lineNumberService, QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -49,8 +53,11 @@ private:
     QTextEdit *m_textEdit;
     QMenuBar *m_menuBar;
     ToolBar *m_toolBar;
+    LineNumberWidget *m_lineNumberWidget;
+    QWidget *m_centralWidget;
     IFileService *m_fileService;
     IFontService *m_fontService;
+    ILineNumberService *m_lineNumberService;
     QString m_currentFilePath;
     
     // File menu actions

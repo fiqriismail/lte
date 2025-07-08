@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "toolbar.h"
+#include "linenumberwidget.h"
 #include "../../features/shared/types/common.h"
 #include <QApplication>
 #include <QMenu>
@@ -8,13 +9,16 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 
-MainWindow::MainWindow(IFileService *fileService, IFontService *fontService, QWidget *parent)
+MainWindow::MainWindow(IFileService *fileService, IFontService *fontService, ILineNumberService *lineNumberService, QWidget *parent)
     : QMainWindow(parent)
     , m_textEdit(nullptr)
     , m_menuBar(nullptr)
     , m_toolBar(nullptr)
+    , m_lineNumberWidget(nullptr)
+    , m_centralWidget(nullptr)
     , m_fileService(fileService)
     , m_fontService(fontService)
+    , m_lineNumberService(lineNumberService)
     , m_currentFilePath("")
     , m_newAction(nullptr)
     , m_openAction(nullptr)
@@ -47,9 +51,27 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupUI()
 {
-    // Central widget setup
-    m_textEdit = new QTextEdit(this);
-    setCentralWidget(m_textEdit);
+    // Create central widget with horizontal layout
+    m_centralWidget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(m_centralWidget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    
+    // Create line number widget
+    m_lineNumberWidget = new LineNumberWidget(m_lineNumberService, m_centralWidget);
+    
+    // Create text edit
+    m_textEdit = new QTextEdit(m_centralWidget);
+    
+    // Add widgets to layout
+    layout->addWidget(m_lineNumberWidget);
+    layout->addWidget(m_textEdit);
+    
+    // Set the central widget
+    setCentralWidget(m_centralWidget);
+    
+    // Connect line number widget to text editor
+    m_lineNumberWidget->setTextEditor(m_textEdit);
     
     // Menu bar setup
     m_menuBar = menuBar();
@@ -280,4 +302,9 @@ void MainWindow::applyCurrentFont()
     QFont currentFont = m_fontService->getDefaultFont();
     currentFont.setPointSize(m_fontService->getCurrentFontSize());
     m_textEdit->setFont(currentFont);
+    
+    // Update line number widget font
+    if (m_lineNumberWidget) {
+        m_lineNumberWidget->updateFont();
+    }
 } 
