@@ -1,0 +1,236 @@
+#include "mainwindow.h"
+#include "toolbar.h"
+#include "../../features/shared/types/common.h"
+#include <QApplication>
+#include <QMenu>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QFileInfo>
+#include <QStandardPaths>
+
+MainWindow::MainWindow(IFileService *fileService, QWidget *parent)
+    : QMainWindow(parent)
+    , m_textEdit(nullptr)
+    , m_menuBar(nullptr)
+    , m_toolBar(nullptr)
+    , m_fileService(fileService)
+    , m_currentFilePath("")
+    , m_newAction(nullptr)
+    , m_openAction(nullptr)
+    , m_saveAction(nullptr)
+    , m_saveAsAction(nullptr)
+    , m_quitAction(nullptr)
+    , m_undoAction(nullptr)
+    , m_redoAction(nullptr)
+    , m_cutAction(nullptr)
+    , m_copyAction(nullptr)
+    , m_pasteAction(nullptr)
+{
+    setupUI();
+    setupFileMenu();
+    setupEditMenu();
+    setupToolBar();
+    connectSignals();
+    
+    setWindowTitle(AppConstants::APP_NAME);
+    resize(AppConstants::DEFAULT_WINDOW_WIDTH, AppConstants::DEFAULT_WINDOW_HEIGHT);
+}
+
+MainWindow::~MainWindow()
+{
+    // Qt will handle cleanup of child widgets
+}
+
+void MainWindow::setupUI()
+{
+    // Central widget setup
+    m_textEdit = new QTextEdit(this);
+    setCentralWidget(m_textEdit);
+    
+    // Menu bar setup
+    m_menuBar = menuBar();
+}
+
+void MainWindow::setupFileMenu()
+{
+    QMenu *fileMenu = m_menuBar->addMenu("&File");
+    
+    // File menu actions
+    m_newAction = new QAction("&New", this);
+    m_newAction->setShortcut(QKeySequence::New);
+    fileMenu->addAction(m_newAction);
+
+    m_openAction = new QAction("&Open...", this);
+    m_openAction->setShortcut(QKeySequence::Open);
+    fileMenu->addAction(m_openAction);
+    
+    m_saveAction = new QAction("&Save", this);
+    m_saveAction->setShortcut(QKeySequence::Save);
+    fileMenu->addAction(m_saveAction);
+
+    m_saveAsAction = new QAction("Save &As...", this);
+    m_saveAsAction->setShortcut(QKeySequence::SaveAs);
+    fileMenu->addAction(m_saveAsAction);
+    
+    fileMenu->addSeparator();
+    
+    m_quitAction = new QAction("&Quit", this);
+    m_quitAction->setShortcut(QKeySequence::Quit);
+    fileMenu->addAction(m_quitAction);
+}
+
+void MainWindow::setupEditMenu()
+{
+    QMenu *editMenu = m_menuBar->addMenu("&Edit");
+    
+    // Edit menu actions
+    m_undoAction = new QAction("&Undo", this);
+    m_undoAction->setShortcut(QKeySequence::Undo);
+    editMenu->addAction(m_undoAction);
+    
+    m_redoAction = new QAction("&Redo", this);
+    m_redoAction->setShortcut(QKeySequence::Redo);
+    editMenu->addAction(m_redoAction);
+    
+    editMenu->addSeparator();
+    
+    m_cutAction = new QAction("Cu&t", this);
+    m_cutAction->setShortcut(QKeySequence::Cut);
+    editMenu->addAction(m_cutAction);
+    
+    m_copyAction = new QAction("&Copy", this);
+    m_copyAction->setShortcut(QKeySequence::Copy);
+    editMenu->addAction(m_copyAction);
+    
+    m_pasteAction = new QAction("&Paste", this);
+    m_pasteAction->setShortcut(QKeySequence::Paste);
+    editMenu->addAction(m_pasteAction);
+}
+
+void MainWindow::setupToolBar()
+{
+    m_toolBar = new ToolBar(this);
+    m_toolBar->setupActions(m_newAction, m_openAction, m_saveAction);
+    addToolBar(m_toolBar);
+}
+
+void MainWindow::connectSignals()
+{
+    // File operation connections
+    connect(m_newAction, &QAction::triggered, this, &MainWindow::newFile);
+    connect(m_openAction, &QAction::triggered, this, &MainWindow::openFile);
+    connect(m_saveAction, &QAction::triggered, this, &MainWindow::saveFile);
+    connect(m_saveAsAction, &QAction::triggered, this, &MainWindow::saveAsFile);
+    connect(m_quitAction, &QAction::triggered, this, &MainWindow::quitApplication);
+    
+    // Text editing connections
+    connect(m_undoAction, &QAction::triggered, this, &MainWindow::undoText);
+    connect(m_redoAction, &QAction::triggered, this, &MainWindow::redoText);
+    connect(m_cutAction, &QAction::triggered, this, &MainWindow::cutText);
+    connect(m_copyAction, &QAction::triggered, this, &MainWindow::copyText);
+    connect(m_pasteAction, &QAction::triggered, this, &MainWindow::pasteText);
+}
+
+void MainWindow::newFile()
+{
+    if (!maybeSave())
+        return;
+    m_textEdit->clear();
+    m_currentFilePath.clear();
+    m_textEdit->document()->setModified(false);
+    setWindowTitle(AppConstants::APP_NAME + " - Untitled");
+}
+
+bool MainWindow::maybeSave()
+{
+    if (!m_textEdit->document()->isModified())
+        return true;
+    QMessageBox::StandardButton ret = QMessageBox::warning(this, AppConstants::APP_NAME,
+        "The document has been modified.\nDo you want to save your changes?",
+        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    if (ret == QMessageBox::Save) {
+        saveFile();
+        return !m_textEdit->document()->isModified();
+    } else if (ret == QMessageBox::Cancel) {
+        return false;
+    }
+    return true;
+}
+
+// File Operations Slice
+void MainWindow::openFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, FileOperations::OPEN_DIALOG_TITLE, "", AppConstants::FILE_FILTER);
+    if (!fileName.isEmpty()) {
+        QString content = m_fileService->openFile(fileName);
+        if (!content.isNull()) {
+            m_textEdit->setPlainText(content);
+            m_currentFilePath = fileName;
+            setWindowTitle(AppConstants::APP_NAME + " - " + QFileInfo(fileName).fileName());
+        } else {
+            QMessageBox::warning(this, FileOperations::ERROR_DIALOG_TITLE, m_fileService->getLastError());
+        }
+    }
+}
+
+void MainWindow::saveFile()
+{
+    QString fileName = m_currentFilePath;
+    if (fileName.isEmpty()) {
+        QString defaultDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+        fileName = QFileDialog::getSaveFileName(this, FileOperations::SAVE_DIALOG_TITLE, defaultDir, AppConstants::FILE_FILTER);
+        if (fileName.isEmpty()) return;
+    }
+    QString content = m_textEdit->toPlainText();
+    if (!m_fileService->saveFile(fileName, content)) {
+        QMessageBox::warning(this, FileOperations::ERROR_DIALOG_TITLE, m_fileService->getLastError());
+    } else {
+        m_currentFilePath = fileName;
+        setWindowTitle(AppConstants::APP_NAME + " - " + QFileInfo(fileName).fileName());
+    }
+}
+
+void MainWindow::saveAsFile()
+{
+    QString defaultDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString fileName = QFileDialog::getSaveFileName(this, FileOperations::SAVE_DIALOG_TITLE, defaultDir, AppConstants::FILE_FILTER);
+    if (fileName.isEmpty()) return;
+    QString content = m_textEdit->toPlainText();
+    if (!m_fileService->saveFile(fileName, content)) {
+        QMessageBox::warning(this, FileOperations::ERROR_DIALOG_TITLE, m_fileService->getLastError());
+    } else {
+        m_currentFilePath = fileName;
+        setWindowTitle(AppConstants::APP_NAME + " - " + QFileInfo(fileName).fileName());
+    }
+}
+
+void MainWindow::quitApplication()
+{
+    QApplication::quit();
+}
+
+// Text Editing Operations Slice
+void MainWindow::undoText()
+{
+    m_textEdit->undo();
+}
+
+void MainWindow::redoText()
+{
+    m_textEdit->redo();
+}
+
+void MainWindow::cutText()
+{
+    m_textEdit->cut();
+}
+
+void MainWindow::copyText()
+{
+    m_textEdit->copy();
+}
+
+void MainWindow::pasteText()
+{
+    m_textEdit->paste();
+} 
