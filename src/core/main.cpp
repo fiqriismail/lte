@@ -1,6 +1,7 @@
 #include <QApplication>
 #include "../ui/mainwindow.h"
 #include "../../features/file-operations/fileservice.h"
+#include "../../features/font-management/fontservice.h"
 #include "../../features/shared/types/common.h"
 
 int main(int argc, char *argv[])
@@ -13,9 +14,10 @@ int main(int argc, char *argv[])
     
     // Create services with dependency injection
     FileService *fileService = new FileService(&app);
+    FontService *fontService = new FontService();
     
     // Create main window with injected dependencies
-    MainWindow window(fileService);
+    MainWindow window(fileService, fontService);
     window.show();
     
     return app.exec();

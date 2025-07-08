@@ -8,12 +8,13 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 
-MainWindow::MainWindow(IFileService *fileService, QWidget *parent)
+MainWindow::MainWindow(IFileService *fileService, IFontService *fontService, QWidget *parent)
     : QMainWindow(parent)
     , m_textEdit(nullptr)
     , m_menuBar(nullptr)
     , m_toolBar(nullptr)
     , m_fileService(fileService)
+    , m_fontService(fontService)
     , m_currentFilePath("")
     , m_newAction(nullptr)
     , m_openAction(nullptr)
@@ -25,11 +26,14 @@ MainWindow::MainWindow(IFileService *fileService, QWidget *parent)
     , m_cutAction(nullptr)
     , m_copyAction(nullptr)
     , m_pasteAction(nullptr)
+    , m_zoomInAction(nullptr)
+    , m_zoomOutAction(nullptr)
 {
     setupUI();
     setupFileMenu();
     setupEditMenu();
     setupToolBar();
+    setupFontManagement();
     connectSignals();
     
     setWindowTitle(AppConstants::APP_NAME);
@@ -105,6 +109,17 @@ void MainWindow::setupEditMenu()
     m_pasteAction = new QAction("&Paste", this);
     m_pasteAction->setShortcut(QKeySequence::Paste);
     editMenu->addAction(m_pasteAction);
+    
+    editMenu->addSeparator();
+    
+    // Font management actions
+    m_zoomInAction = new QAction("Zoom &In", this);
+    m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
+    editMenu->addAction(m_zoomInAction);
+    
+    m_zoomOutAction = new QAction("Zoom &Out", this);
+    m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+    editMenu->addAction(m_zoomOutAction);
 }
 
 void MainWindow::setupToolBar()
@@ -112,6 +127,12 @@ void MainWindow::setupToolBar()
     m_toolBar = new ToolBar(this);
     m_toolBar->setupActions(m_newAction, m_openAction, m_saveAction);
     addToolBar(m_toolBar);
+}
+
+void MainWindow::setupFontManagement()
+{
+    // Apply the default font from the font service
+    applyCurrentFont();
 }
 
 void MainWindow::connectSignals()
@@ -129,6 +150,10 @@ void MainWindow::connectSignals()
     connect(m_cutAction, &QAction::triggered, this, &MainWindow::cutText);
     connect(m_copyAction, &QAction::triggered, this, &MainWindow::copyText);
     connect(m_pasteAction, &QAction::triggered, this, &MainWindow::pasteText);
+    
+    // Font management connections
+    connect(m_zoomInAction, &QAction::triggered, this, &MainWindow::increaseFontSize);
+    connect(m_zoomOutAction, &QAction::triggered, this, &MainWindow::decreaseFontSize);
 }
 
 void MainWindow::newFile()
@@ -233,4 +258,26 @@ void MainWindow::copyText()
 void MainWindow::pasteText()
 {
     m_textEdit->paste();
+}
+
+// Font Management Operations Slice
+void MainWindow::increaseFontSize()
+{
+    if (m_fontService->increaseFontSize()) {
+        applyCurrentFont();
+    }
+}
+
+void MainWindow::decreaseFontSize()
+{
+    if (m_fontService->decreaseFontSize()) {
+        applyCurrentFont();
+    }
+}
+
+void MainWindow::applyCurrentFont()
+{
+    QFont currentFont = m_fontService->getDefaultFont();
+    currentFont.setPointSize(m_fontService->getCurrentFontSize());
+    m_textEdit->setFont(currentFont);
 } 

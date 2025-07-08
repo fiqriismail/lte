@@ -7,13 +7,14 @@
 #include <QAction>
 #include "toolbar.h"
 #include "../../features/shared/interfaces/ifileservice.h"
+#include "../../features/shared/interfaces/ifontservice.h"
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(IFileService *fileService, QWidget *parent = nullptr);
+    MainWindow(IFileService *fileService, IFontService *fontService, QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -31,18 +32,25 @@ private slots:
     void copyText();
     void pasteText();
 
+    // Font management operations
+    void increaseFontSize();
+    void decreaseFontSize();
+
 private:
     void setupUI();
     void setupFileMenu();
     void setupEditMenu();
     void setupToolBar();
+    void setupFontManagement();
     void connectSignals();
     bool maybeSave();
+    void applyCurrentFont();
 
     QTextEdit *m_textEdit;
     QMenuBar *m_menuBar;
     ToolBar *m_toolBar;
     IFileService *m_fileService;
+    IFontService *m_fontService;
     QString m_currentFilePath;
     
     // File menu actions
@@ -58,6 +66,10 @@ private:
     QAction *m_cutAction;
     QAction *m_copyAction;
     QAction *m_pasteAction;
+    
+    // Font management actions
+    QAction *m_zoomInAction;
+    QAction *m_zoomOutAction;
 };
 
 #endif // MAINWINDOW_H 
