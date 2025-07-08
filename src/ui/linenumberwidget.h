@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QTextEdit>
-#include "../../features/shared/interfaces/ilinenumberservice.h"
+#include "shared/interfaces/ilinenumberservice.h"
 
 class LineNumberWidget : public QWidget
 {

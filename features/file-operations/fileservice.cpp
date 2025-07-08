@@ -1,5 +1,5 @@
 #include "fileservice.h"
-#include "../shared/types/common.h"
+#include "shared/types/common.h"
 #include <QFile>
 #include <QTextStream>
 

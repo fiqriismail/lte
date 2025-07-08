@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QFont>
-#include "../shared/interfaces/ifontservice.h"
+#include "shared/interfaces/ifontservice.h"
 
 class FontService : public QObject, public IFontService
 {

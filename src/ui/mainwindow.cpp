@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "toolbar.h"
 #include "linenumberwidget.h"
-#include "../../features/shared/types/common.h"
+#include "shared/types/common.h"
 #include <QApplication>
 #include <QMenu>
 #include <QFileDialog>

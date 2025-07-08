@@ -1,7 +1,7 @@
 #ifndef FILESERVICE_H
 #define FILESERVICE_H
 
-#include "../shared/interfaces/ifileservice.h"
+#include "shared/interfaces/ifileservice.h"
 
 class FileService : public IFileService
 {
